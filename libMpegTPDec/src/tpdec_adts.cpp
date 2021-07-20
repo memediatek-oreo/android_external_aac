@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -185,7 +185,9 @@ TRANSPORTDEC_ERROR adtsRead_DecodeHeader(
 #endif
 
   valBits = FDKgetValidBits(hBs);
-
+#ifdef MTK_AOSP_ENHANCEMENT
+  if (valBits <= ADTS_HEADERLENGTH) return TRANSPORTDEC_NOT_ENOUGH_BITS;
+#endif
   /* adts_fixed_header */
   bs.mpeg_id           = FDKreadBits(hBs, Adts_Length_Id);
   bs.layer             = FDKreadBits(hBs, Adts_Length_Layer);

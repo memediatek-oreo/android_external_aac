@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -208,6 +208,9 @@ FDK_INLINE void FDKdeleteBitStream (HANDLE_FDK_BITSTREAM hBitStream)
 FDK_INLINE UINT FDKreadBits(HANDLE_FDK_BITSTREAM hBitStream,
                         const UINT numberOfBits)
 {
+#ifdef MTK_AOSP_ENHANCEMENT
+  hBitStream->hBitBuf.usedBits += numberOfBits;
+#endif
 #ifdef noOPTIMIZE_FDKREADBITS
   INT missingBits = numberOfBits - hBitStream->BitsInCache;
   if (missingBits > 0)
@@ -241,6 +244,9 @@ FDK_INLINE UINT FDKreadBits(HANDLE_FDK_BITSTREAM hBitStream,
 FDK_INLINE UINT FDKreadBit(HANDLE_FDK_BITSTREAM hBitStream)
 {
 #ifdef OPTIMIZE_FDKREADBITS
+#ifdef MTK_AOSP_ENHANCEMENT
+  hBitStream->hBitBuf.usedBits += 1;
+#endif
   if (!hBitStream->BitsInCache)
   {
     hBitStream->CacheWord = FDK_get32 (&hBitStream->hBitBuf);

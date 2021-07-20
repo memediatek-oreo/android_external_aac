@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -582,6 +582,7 @@ int CProgramConfig_LookupElement(
       || elType == ID_LFE )
     {
       *elMapping = pPce->elCounter;
+#ifndef MTK_AOSP_ENHANCEMENT
       if (elList[pPce->elCounter] != elType) {
         /* Not in the list */
         if ( (channelConfig == 2) && (elType == ID_SCE) )
@@ -592,6 +593,7 @@ int CProgramConfig_LookupElement(
           return 0;
         }
       }
+#endif
       /* Assume all front channels */
       getImplicitAudioChannelTypeAndIndex(&chType[channelIdx], &chIndex[channelIdx], channelConfig, channelIdx);
       if (elType == ID_CPE) {

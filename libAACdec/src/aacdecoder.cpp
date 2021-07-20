@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -513,6 +513,15 @@ AAC_DECODER_ERROR CAacDecoder_ExtPayloadParse (HANDLE_AACDECODER self,
   case EXT_SBR_DATA_CRC:
     crcFlag = 1;
   case EXT_SBR_DATA:
+// for error recovery, AC-LD should not have EXT_SBR extension data.
+#ifdef MTK_AOSP_ENHANCEMENT
+    if (self->flags & AC_LD)
+    {
+        *count = 0;
+        FDKresetBitbuffer(hBs);
+        return AAC_DEC_OK;
+    }
+#endif
     if (IS_CHANNEL_ELEMENT(previous_element)) {
       SBR_ERROR sbrError;
 
@@ -579,7 +588,19 @@ AAC_DECODER_ERROR CAacDecoder_ExtPayloadParse (HANDLE_AACDECODER self,
         temp = FDKreadBits(hBs,8);
         bytes--;
         if (temp != 0xa5) {
-          error = AAC_DEC_PARSE_ERROR;
+#ifdef MTK_AOSP_ENHANCEMENT
+        if (self->flags & AC_LD)
+        {
+            bytes = 0;
+            FDKpushBack(hBs, 8);
+        }
+        else
+        {
+            error = AAC_DEC_PARSE_ERROR;
+        }
+#else
+        error = AAC_DEC_PARSE_ERROR;
+#endif
           break;
         }
       }
@@ -658,9 +679,23 @@ AAC_DECODER_ERROR CAacDecoder_ExtPayloadParse (HANDLE_AACDECODER self,
   case EXT_FIL:
 
   default:
+#ifdef MTK_AOSP_ENHANCEMENT
+    if (self->flags & AC_LD)
+    {
+        *count = 0;
+        FDKresetBitbuffer(hBs);
+    }
+    else
+    {
+        /* align = 4 */
+        FDKpushFor(hBs, *count);
+        *count = 0;
+    }
+#else
     /* align = 4 */
     FDKpushFor(hBs, *count);
     *count = 0;
+#endif
     break;
   }
 
@@ -1135,7 +1170,11 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
   /* Any supported base layer valid AU will require more than 16 bits. */
   if ( (transportDec_GetAuBitsRemaining(self->hInput, 0) < 15) && (flags & (AACDEC_CONCEAL|AACDEC_FLUSH)) == 0) {
     self->frameOK = 0;
+#ifdef MTK_AOSP_ENHANCEMENT
+    return (AAC_DEC_NOT_ENOUGH_BITS);
+#else
     ErrorStatus = AAC_DEC_DECODE_FRAME_ERROR;
+#endif
   }
 
 
@@ -1213,6 +1252,9 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
   int element_count = 0;                    /* Element counter for elements found in the bitstream */
   int el_cnt[ID_LAST] = { 0 };              /* element counter ( robustness ) */
 
+#ifdef MTK_AOSP_ENHANCEMENT
+  bs->hBitBuf.usedBits = 0;
+#endif
   while ( (type != ID_END) && (! (flags & (AACDEC_CONCEAL | AACDEC_FLUSH))) && self->frameOK )
   {
     int el_channels;
@@ -1290,6 +1332,10 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
                   type) )
           {
             if ( !hdaacDecoded ) {
+          #ifdef MTK_AOSP_ENHANCEMENT
+               if (!(flags & AACDEC_BYPASS))
+          #endif
+               {
               CChannelElement_Decode(
                      &self->pAacDecoderChannelInfo[aacChannels],
                      &self->pAacDecoderStaticChannelInfo[aacChannels],
@@ -1297,6 +1343,7 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
                       self->flags,
                       el_channels
                       );
+                }
             }
             aacChannels += 1;
             if (type == ID_CPE) {
@@ -1306,6 +1353,10 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
           else {
             self->frameOK = 0;
           }
+      #ifdef MTK_AOSP_ENHANCEMENT
+          if (!(flags & AACDEC_BYPASS))
+      #endif
+          {
           /* Create SBR element for SBR for upsampling for LFE elements,
              and if SBR was explicitly signaled, because the first frame(s)
              may not contain SBR payload (broken encoder, bit errors). */
@@ -1328,7 +1379,7 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
             }
           }
         }
-
+}
         el_cnt[type]++;
         break;
 
@@ -1579,12 +1630,13 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
     if ( transportDec_GetAuBitsTotal(self->hInput, 0) > 0 ) {
       INT unreadBits = transportDec_GetAuBitsRemaining(self->hInput, 0);
       if ( unreadBits != 0 ) {
-
+#ifndef MTK_AOSP_ENHANCEMENT
         self->frameOK = 0;
         /* Do not overwrite current error */
         if (ErrorStatus == AAC_DEC_OK && self->frameOK == 0) {
           ErrorStatus = AAC_DEC_PARSE_ERROR;
         }
+#endif
         /* Always put the bitbuffer at the right position after the current Access Unit. */
         FDKpushBiDirectional(bs, unreadBits);
       }
@@ -1678,6 +1730,9 @@ LINKSPEC_CPP AAC_DECODER_ERROR CAacDecoder_DecodeFrame(
   /*
     Inverse transform
   */
+ #ifdef MTK_AOSP_ENHANCEMENT
+  if (!(flags & AACDEC_BYPASS))
+ #endif
   {
     int stride, offset, c;
 

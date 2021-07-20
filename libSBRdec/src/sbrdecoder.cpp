@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -977,7 +977,9 @@ SBR_ERROR sbrDecoder_Parse(
 
   int  stereo;
   int  fDoDecodeSbrData = 1;
-
+#ifdef MTK_AOSP_ENHANCEMENT
+  int  fgContinue = 0;
+#endif
   int lastSlot, lastHdrSlot = 0, thisHdrSlot;
 
   /* Reverse bits of DRM SBR payload */
@@ -1220,6 +1222,9 @@ SBR_ERROR sbrDecoder_Parse(
       /* sanity check of remaining bits */
       if (valBits < 0) {
         fDoDecodeSbrData = 0;
+#ifdef MTK_AOSP_ENHANCEMENT
+		fgContinue = 1;
+#endif
       } else {
         switch (self->coreCodec) {
         case AOT_SBR:
@@ -1249,6 +1254,9 @@ SBR_ERROR sbrDecoder_Parse(
   if (!fDoDecodeSbrData) {
     /* Set error flag for this slot to trigger concealment */
     self->pSbrElement[elementIndex]->frameErrorFlag[hSbrElement->useFrameSlot] = 1;
+#ifdef MTK_AOSP_ENHANCEMENT
+	if(!fgContinue)
+#endif
     errorStatus = SBRDEC_PARSE_ERROR;
   } else {
     /* Everything seems to be ok so clear the error flag */

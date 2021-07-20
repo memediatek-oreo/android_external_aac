@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -475,11 +475,17 @@ static void FDKaacEnc_initAvoidHoleFlag(QC_OUT_CHANNEL  *qcOutChannel[(2)],
       if (psyOutChannel[ch]->lastWindowSequence != SHORT_WINDOW) {
          for (sfbGrp = 0;sfbGrp < psyOutChannel[ch]->sfbCnt;sfbGrp+= psyOutChannel[ch]->sfbPerGroup)
            for (sfb=0; sfb<psyOutChannel[ch]->maxSfbPerGroup; sfb++)
+#ifdef MTK_AOSP_ENHANCEMENT
+              if ((sfbGrp+sfb) < MAX_GROUPED_SFB)
+#endif
               qcOutChan->sfbSpreadEnergy[sfbGrp+sfb] >>= 1 ;
       }
       else {
          for (sfbGrp = 0;sfbGrp < psyOutChannel[ch]->sfbCnt;sfbGrp+= psyOutChannel[ch]->sfbPerGroup)
            for (sfb=0; sfb<psyOutChannel[ch]->maxSfbPerGroup; sfb++)
+#ifdef MTK_AOSP_ENHANCEMENT
+              if ((sfbGrp+sfb) < MAX_GROUPED_SFB)
+#endif
               qcOutChan->sfbSpreadEnergy[sfbGrp+sfb] =
                    fMult(FL2FXCONST_DBL(0.63f),
                          qcOutChan->sfbSpreadEnergy[sfbGrp+sfb]) ;
@@ -538,6 +544,9 @@ static void FDKaacEnc_initAvoidHoleFlag(QC_OUT_CHANNEL  *qcOutChannel[(2)],
       PSY_OUT_CHANNEL*  psyOutChanM  = psyOutChannel[0];
       for(sfbGrp = 0;sfbGrp < psyOutChanM->sfbCnt;sfbGrp+= psyOutChanM->sfbPerGroup){
         for (sfb=0; sfb<psyOutChanM->maxSfbPerGroup; sfb++) {
+#ifdef MTK_AOSP_ENHANCEMENT
+          if ((sfbGrp+sfb) < MAX_GROUPED_SFB) {
+#endif
           if (toolsInfo->msMask[sfbGrp+sfb]) {
              FIXP_DBL maxSfbEnLd = fixMax(qcOutChanM->sfbEnergyLdData[sfbGrp+sfb],qcOutChanS->sfbEnergyLdData[sfbGrp+sfb]);
              FIXP_DBL maxThrLd, sfbMinSnrTmpLd;
@@ -575,6 +584,9 @@ static void FDKaacEnc_initAvoidHoleFlag(QC_OUT_CHANNEL  *qcOutChannel[(2)],
                 qcOutChanM->sfbSpreadEnergy[sfbGrp+sfb] =
                    fMult(qcOutChanM->sfbEnergy[sfbGrp+sfb], FL2FXCONST_DBL(0.9f));
           }
+#ifdef MTK_AOSP_ENHANCEMENT
+        }
+#endif
         }
       }
    }
@@ -585,6 +597,9 @@ static void FDKaacEnc_initAvoidHoleFlag(QC_OUT_CHANNEL  *qcOutChannel[(2)],
       PSY_OUT_CHANNEL  *psyOutChan  = psyOutChannel[ch];
       for(sfbGrp = 0;sfbGrp < psyOutChan->sfbCnt;sfbGrp+= psyOutChan->sfbPerGroup){
         for (sfb=0; sfb<psyOutChan->maxSfbPerGroup; sfb++) {
+#ifdef MTK_AOSP_ENHANCEMENT
+          if ((sfbGrp+sfb) < MAX_GROUPED_SFB) {
+#endif
           if ((qcOutChan->sfbSpreadEnergy[sfbGrp+sfb] > qcOutChan->sfbEnergy[sfbGrp+sfb])
               || (qcOutChan->sfbMinSnrLdData[sfbGrp+sfb] > FL2FXCONST_DBL(0.0f))) {
              ahFlag[ch][sfbGrp+sfb] = NO_AH;
@@ -592,6 +607,9 @@ static void FDKaacEnc_initAvoidHoleFlag(QC_OUT_CHANNEL  *qcOutChannel[(2)],
           else {
              ahFlag[ch][sfbGrp+sfb] = AH_INACTIVE;
           }
+#ifdef MTK_AOSP_ENHANCEMENT
+          }
+#endif
         }
       }
    }
@@ -2642,6 +2660,9 @@ void FDKaacEnc_AdjustThresholds(ATS_ELEMENT*        AdjThrStateElement[(8)],
             QC_OUT_CHANNEL* pQcOutCh = qcElement[i]->qcOutChannel[ch];
             for (sfbGrp = 0;sfbGrp < psyOutElement[i]->psyOutChannel[ch]->sfbCnt; sfbGrp+=psyOutElement[i]->psyOutChannel[ch]->sfbPerGroup) {
                 for (sfb=0; sfb<psyOutElement[i]->psyOutChannel[ch]->maxSfbPerGroup; sfb++) {
+#ifdef MTK_AOSP_ENHANCEMENT
+                      if ((sfb+sfbGrp) < MAX_GROUPED_SFB)
+#endif
                     pQcOutCh->sfbThresholdLdData[sfb+sfbGrp] += pQcOutCh->sfbEnFacLd[sfb+sfbGrp];
                 }
             }

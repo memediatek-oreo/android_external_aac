@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -1100,10 +1100,15 @@ TRANSPORTDEC_ERROR transportDec_ReadAccessUnit( const HANDLE_TRANSPORTDEC hTp, c
       break;
 
     case TT_MP4_RAW:
+#ifdef MTK_AOSP_ENHANCEMENT
+      hTp->auLength[layer] = -1;
+#else
+
+	  /* One Access Unit was filled into buffer.
     case TT_DRM:
-      /* One Access Unit was filled into buffer.
          So get the length out of the buffer. */
       hTp->auLength[layer] = FDKgetValidBits(hBs);
+#endif
       hTp->flags |= TPDEC_SYNCOK;
       break;
 

@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2013 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -135,6 +135,9 @@ void FDKaacEnc_MsStereoProcessing(PSY_DATA   *RESTRICT psyData[(2)],
     for(sfb=0; sfb<sfbCnt; sfb+=sfbPerGroup) {
       for(sfboffs=0;sfboffs<maxSfbPerGroup;sfboffs++) {
 
+#ifdef MTK_AOSP_ENHANCEMENT
+        if ((sfb+sfboffs) < MAX_GROUPED_SFB) {
+#endif
         if ( (isBook==NULL) ? 1 : (isBook[sfb+sfboffs] == 0) ) {
           FIXP_DBL tmp;
 
@@ -207,6 +210,9 @@ void FDKaacEnc_MsStereoProcessing(PSY_DATA   *RESTRICT psyData[(2)],
           /* prohibit MS_MASK_ALL in combination with IS */
           numMsMaskFalse = 9;
         } /* isBook */
+#ifdef MTK_AOSP_ENHANCEMENT
+      }
+#endif
       } /* sfboffs */
     } /* sfb */
 

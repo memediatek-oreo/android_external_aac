@@ -2,7 +2,7 @@
 /* -----------------------------------------------------------------------------------------------------------
 Software License for The Fraunhofer FDK AAC Codec Library for Android
 
-© Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
+?Copyright  1995 - 2015 Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V.
   All rights reserved.
 
  1.    INTRODUCTION
@@ -692,6 +692,9 @@ aacDecoder_ConfigRaw ( HANDLE_AACDECODER self,
  *                    The value is updated according to the amount of newly copied bytes.
  * \return            Error code.
  */
+#ifdef MTK_AOSP_ENHANCEMENT
+#define AACDEC_BYPASS   (1 << 31)/*!< Flag for aacDecoder_DecodeFrame(): Bypass signal processing, used for seek time table buildup */
+#endif
 LINKSPEC_H AAC_DECODER_ERROR
 aacDecoder_Fill ( HANDLE_AACDECODER  self,
                   UCHAR             *pBuffer[],
